@@ -11,10 +11,10 @@ services:
     image: mongo:${MONGO_VERSION:-latest}
     container_name: mongo
     restart: unless-stopped
-    networks:
-      - mongo
-    #ports:
-    #  - 27017:27017
+    #networks:
+    #  - mongo
+    ports:
+      - 27017:27017
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER:-mongo}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASS:-password}
@@ -25,6 +25,6 @@ services:
     #labels:
     #  - traefik.enable=false
 
-networks:
-  mongo:
-    external: true
+#networks:
+#  mongo:
+#    external: true
