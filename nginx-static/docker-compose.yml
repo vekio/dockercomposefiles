@@ -1,0 +1,14 @@
+version: "3.7"
+
+services:
+  ## Nginx - Web Server
+  # https://hub.docker.com/_/nginx
+  #
+  nginx:
+    image: nginx:${NGINX_VERSION:-latest}
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 8080:80
+    volumes:
+      - ~/docker/nginx/html:/usr/share/nginx/html:ro
