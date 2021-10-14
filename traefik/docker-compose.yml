@@ -1,0 +1,62 @@
+version: "3.7"
+
+services:
+
+  # Traefik - Reverse Proxy
+  #   https://hub.docker.com/_/traefik
+  #
+  traefik:
+    image: traefik:${TRAEFIK_VERSION:-latest}
+    container_name: traefik
+    hostname: traefik
+    restart: unless-stopped
+    networks:
+      - proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    command:
+      - "--api=true" # (Default: false)
+      - "--entryPoints.http.address=:80"
+      - "--entrypoints.http.http.redirections.entryPoint.to=https"
+      - "--entryPoints.https.address=:443"
+      - "--log=true" # (Default: false)
+      - "--log.level=ERROR" # (Default: ERROR) DEBUG, INFO, WARN, ERROR, FATAL, PANIC
+      - "--accesslog=true" # (Default: false)
+      - "--accesslog.filePath=/logs/traefik.log"
+      - "--accesslog.bufferingSize=100"
+      - "--providers.docker=true" # (Default: false)
+      - "--providers.docker.exposedbydefault=false" # (Default: true)
+      - "--providers.docker.network=proxy"
+      - "--providers.file.directory=/config" # Load dynamic configuration from a directory.
+      #- "--providers.file.filename=/path/to/file" # Load dynamic configuration from a file.
+      #- "--certificatesResolvers.digitalocean.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory" # LetsEncrypt Staging Server.
+      - "--certificatesResolvers.digitalocean.acme.caServer=https://acme-v02.api.letsencrypt.org/directory"
+      - "--certificatesResolvers.digitalocean.acme.email=${TRAEFIK_EMAIL}"
+      - "--certificatesResolvers.digitalocean.acme.storage=/acme.json"
+      - "--certificatesResolvers.digitalocean.acme.dnsChallenge.provider=digitalocean"
+    environment:
+      - DO_AUTH_TOKEN=${DO_AUTH_TOKEN}
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "~/docker/traefik/config:/config"
+      - "~/docker/shared:/shared"
+      - "~/docker/traefik/logs/traefik.log:/logs/traefik.log"
+      - "~/docker/traefik/acme/acme.json:/acme.json"
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.traefik-rtr.entrypoints=https"
+      - "traefik.http.routers.traefik-rtr.rule=Host(`traefik.${DOMAIN}`)"
+      - "traefik.http.routers.traefik-rtr.tls=true"
+      - "traefik.http.routers.traefik-rtr.tls.certresolver=digitalocean"
+      - "traefik.http.routers.traefik-rtr.tls.domains[0].main=${DOMAIN}"
+      - "traefik.http.routers.traefik-rtr.tls.domains[0].sans=*.${DOMAIN}"
+      # Middlewares
+      - "traefik.http.routers.traefik-rtr.middlewares=auth@file"
+      # Services
+      - "traefik.http.routers.traefik-rtr.service=api@internal"
+
+networks:
+  proxy:
+    external: true
