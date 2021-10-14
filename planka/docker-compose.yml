@@ -1,0 +1,52 @@
+version: "3.7"
+
+services:
+
+  # Planka - Trello-like kanban board
+  #   https://hub.docker.com/r/meltyshev/planka
+  #
+  planka:
+    image: meltyshev/planka:${PLANKA_VERSION:-latest}
+    container_name: planka
+    hostname: planka
+    restart: unless-stopped
+    networks:
+      - proxy
+      - postgres
+    #ports:
+    #  - "3000:1337"
+    volumes:
+      - "~/docker/planka/user-avatars:/app/public/user-avatars"
+      - "~/docker/planka/project-background-images:/app/public/project-background-images"
+      - "~/docker/planka/attachments:/app/public/attachments"
+    environment:
+      - BASE_URL=https://kanban.${DOMAIN}
+      - DATABASE_URL=postgresql://planka:${PLANKA_DB_PASS:-password}@postgres/plankadb
+      - SECRET_KEY=${PLANKA_SECRET_KEY:-nosecretkey} # Generated with openssl rand -hex 64
+    command: >
+      bash -c
+        "for i in `seq 1 30`; do
+          ./start.sh &&
+          s=$$? && break || s=$$?;
+          echo \"Tried $$i times. Waiting 5 seconds...\";
+          sleep 5;
+        done; (exit $$s)"
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.planka-rtr.entrypoints=https"
+      - "traefik.http.routers.planka-rtr.rule=Host(`kanban.${DOMAIN}`)"
+      - "traefik.http.routers.planka-rtr.tls=true"
+      - "traefik.http.routers.planka-rtr.tls.certresolver=digitalocean"
+      - "traefik.http.routers.planka-rtr.tls.domains[0].main=${DOMAIN}"
+      - "traefik.http.routers.planka-rtr.tls.domains[0].sans=*.${DOMAIN}"
+      - "traefik.http.routers.planka-rtr.tls.options=default"
+      # HTTP Services
+      - "traefik.http.routers.planka-rtr.service=planka-svc"
+      - "traefik.http.services.planka-svc.loadbalancer.server.port=1337"
+
+networks:
+  proxy:
+    external: true
+  postgres:
+    external: true
