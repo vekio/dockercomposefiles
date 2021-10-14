@@ -1,0 +1,45 @@
+version: "3.7"
+
+services:
+
+  # Joplin - Note-Taking App
+  #  https://hub.docker.com/r/joplin/server
+  #
+  joplin:
+    image: joplin/server:${JOPLIN_VERSION:-latest}
+    container_name: joplin
+    hostname: joplin
+    restart: unless-stopped
+    networks:
+      - proxy
+      - postgres
+    #ports:
+    #  - "22300:22300"
+    environment:
+      - APP_BASE_URL=https://joplin.${DOMAIN}
+      - APP_PORT=22300
+      - POSTGRES_PASSWORD=${JOPLIN_DB_PASS:-password}
+      - POSTGRES_DATABASE=${JOPLIN_DB_DATABASE:-joplindb}
+      - POSTGRES_USER=${JOPLIN_DB_USER:-joplin}
+      - POSTGRES_PORT=5432
+      - POSTGRES_HOST=postgres
+      - DB_CLIENT=pg
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.joplin-rtr.entrypoints=https"
+      - "traefik.http.routers.joplin-rtr.rule=Host(`joplin.${DOMAIN}`)"
+      - "traefik.http.routers.joplin-rtr.tls=true"
+      - "traefik.http.routers.joplin-rtr.tls.certresolver=digitalocean"
+      - "traefik.http.routers.joplin-rtr.tls.domains[0].main=${DOMAIN}"
+      - "traefik.http.routers.joplin-rtr.tls.domains[0].sans=*.${DOMAIN}"
+      - "traefik.http.routers.joplin-rtr.tls.options=default"
+      # HTTP Services
+      - "traefik.http.routers.joplin-rtr.service=joplin-svc"
+      - "traefik.http.services.joplin-svc.loadbalancer.server.port=22300"
+
+networks:
+  proxy:
+    external: true
+  postgres:
+    external: true
