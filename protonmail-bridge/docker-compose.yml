@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+
+  # ProtonMail Bridge - IMAP/SMTP
+  #   https://hub.docker.com/r/shenxn/protonmail-bridge
+  #
+  protonmail-bridge:
+    image: shenxn/protonmail-bridge:${PROTONMAIL_VERSION:-latest}
+    container_name: protonmail-bridge
+    hostname: protonmail-bridge
+    restart: unless-stopped
+    ports:
+      - "1025:25/tcp"
+      - "1143:143/tcp"
+    volumes:
+      - "~/docker/protonmail-bridge:/root"
+    labels:
+      - traefik.enable=false
