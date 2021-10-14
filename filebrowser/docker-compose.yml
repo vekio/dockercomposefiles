@@ -1,0 +1,38 @@
+version: "3.7"
+
+services:
+
+  # Filebrowser - Web File Browser
+  #   https://hub.docker.com/r/filebrowser/filebrowser/
+  #
+  filebrowser:
+    image: filebrowser/filebrowser:${FILEBROWSER_VERSION:-latest}
+    container_name: filebrowser
+    hostname: filebrowser
+    restart: unless-stopped
+    user: "${FILEBROWSER_UID}:${FILEBROWSER_GID}"
+    networks:
+      - proxy
+    #ports:
+    #  - "80:80"
+    volumes:
+      - "~/storage:/srv"
+      - "~/docker/filebrowser/filebrowser.db:/database.db"
+      - "~/docker/filebrowser/filebrowser.json:/.filebrowser.json"
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.filebrowser-rtr.entrypoints=https"
+      - "traefik.http.routers.filebrowser-rtr.rule=Host(`files.${DOMAIN}`)"
+      - "traefik.http.routers.filebrowser-rtr.tls=true"
+      - "traefik.http.routers.filebrowser-rtr.tls.certresolver=digitalocean"
+      - "traefik.http.routers.filebrowser-rtr.tls.domains[0].main=${DOMAIN}"
+      - "traefik.http.routers.filebrowser-rtr.tls.domains[0].sans=*.${DOMAIN}"
+      - "traefik.http.routers.filebrowser-rtr.tls.options=default"
+      # HTTP Services
+      - "traefik.http.routers.filebrowser-rtr.service=filebrowser-svc"
+      - "traefik.http.services.filebrowser-svc.loadbalancer.server.port=80"
+
+networks:
+  proxy:
+    external: true
