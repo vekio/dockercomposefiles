@@ -1,34 +1,32 @@
 version: "3.7"
 
 services:
-  ## Postgres – Database Server
-  # https://hub.docker.com/_/postgres
+
+  # Postgres – Database Server
+  #   https://hub.docker.com/_/postgres
   #
-  # Create external postgres network:
-  #   docker network create postgres
-  #
-  # Check out databases
-  #   docker exec -it postgres psql -U ${POSTGRES_USER}
+  # docker exec -it postgres psql -U ${POSTGRES_USER}
   #
   postgres:
     image: postgres:${POSTGRES_VERSION:-latest}
     container_name: postgres
+    hostname: postgres
     restart: unless-stopped
-    #networks:
-    #  - postgres
-    ports:
-      - 5432:5432
+    networks:
+      - postgres
+    #ports:
+    #  - "5432:5432"
     environment:
+      - TZ=${POSTGRES_TZ}
+      - PGTZ=${POSTGRES_TZ}
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASS:-password}
     volumes:
-    #  - ./databases:/docker-entrypoint-initdb.d   # Script to create databases at first boot
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
-      - ~/docker/postgres:/var/lib/postgresql/data
-    #labels:
-    #  - traefik.enable=false
+      - "~/docker/shared/db:/docker-entrypoint-initdb.d" # Create databases at first boot
+      - "~/docker/postgres:/var/lib/postgresql/data"
+    labels:
+      - traefik.enable=false
 
-#networks:
-#  postgres:
-#    external: true
+networks:
+  postgres:
+    external: true
