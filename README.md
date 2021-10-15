@@ -1,1 +1,1 @@
-A collection of docker-compose
+A collection of docker-compose files
