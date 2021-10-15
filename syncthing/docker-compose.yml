@@ -1,0 +1,43 @@
+version: "3.7"
+
+services:
+
+  # Syncthing – Continuous File Synchronization
+  #   https://hub.docker.com/r/linuxserver/syncthing
+  #
+  syncthing:
+    image: linuxserver/syncthing:${SYNCTHING_VERSION:-latest}
+    container_name: syncthing
+    hostname: syncthing
+    restart: unless-stopped
+    networks:
+      - proxy
+    ports:
+    #  - "8384:8384" # Application WebUI
+      - "22000:22000/tcp" # Listening port (TCP)
+      - "22000:22000/udp" # Listening port (UDP)
+      - "21027:21027/udp" # Protocol discovery
+    volumes:
+      - "~/docker/syncthing:/config"
+      - "~/storage:/data"
+    environment:
+      - PUID=${SYNCTHING_UID:-1000}
+      - PGID=${SYNCTHING_GID:-1000}
+      - TZ=${SYNCTHING_TZ:-Europe/London}
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.syncthing-rtr.entrypoints=https"
+      - "traefik.http.routers.syncthing-rtr.rule=Host(`sync.${DOMAIN}`)"
+      - "traefik.http.routers.syncthing-rtr.tls=true"
+      - "traefik.http.routers.syncthing-rtr.tls.certresolver=digitalocean"
+      - "traefik.http.routers.syncthing-rtr.tls.domains[0].main=${DOMAIN}"
+      - "traefik.http.routers.syncthing-rtr.tls.domains[0].sans=*.${DOMAIN}"
+      - "traefik.http.routers.syncthing-rtr.tls.options=default"
+      # HTTP Services
+      - "traefik.http.routers.syncthing-rtr.service=syncthing-svc"
+      - "traefik.http.services.syncthing-svc.loadbalancer.server.port=8384"
+
+networks:
+  proxy:
+    external: true
