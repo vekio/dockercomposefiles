@@ -20,7 +20,7 @@ services:
     volumes:
       - "~/docker/mongo:/data/db"
     labels:
-      - traefik.enable=false
+      - "traefik.enable=false"
 
 networks:
   mongo:

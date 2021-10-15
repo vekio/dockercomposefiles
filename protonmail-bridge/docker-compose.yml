@@ -16,4 +16,4 @@ services:
     volumes:
       - "~/docker/protonmail-bridge:/root"
     labels:
-      - traefik.enable=false
+      - "traefik.enable=false"
