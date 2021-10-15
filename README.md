@@ -1,1 +1,1 @@
-Bunch of docker-compose files.
+docker-compose files
