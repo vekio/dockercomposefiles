@@ -1,0 +1,32 @@
+version: "3.7"
+
+services:
+
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: unless-stopped
+    networks:
+      - proxy
+    ports:
+      - 80:80
+      - 666:666
+    command:
+      # - --log.level=DEBUG
+      - --api=true
+      - --providers.docker=true
+      - --providers.docker.network=proxy
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.ssh.address=:666
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.traefik-rtr.entrypoints=web
+      - traefik.http.routers.traefik-rtr.rule=Host(`traefik.${DOMAIN:-docker.localhost}`)
+      - traefik.http.routers.traefik-rtr.service=api@internal
+
+networks:
+  proxy:
+    name: proxy
