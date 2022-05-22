@@ -1,0 +1,23 @@
+version: "3.7"
+
+services:
+
+  db:
+    labels:
+      - traefik.enable=false
+
+  nocodb:
+    networks:
+      - proxy
+    environment:
+      - NC_PUBLIC_URL=http://nocodb.${DOMAIN:-docker.localhost}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.nocodb-rtr.entrypoints=web
+      - traefik.http.routers.nocodb-rtr.rule=Host(`nocodb.${DOMAIN:-docker.localhost}`)
+      - traefik.http.routers.nocodb-rtr.service=nocodb-svc
+      - traefik.http.services.nocodb-svc.loadbalancer.server.port=8080
+
+networks:
+  proxy:
+    external: true
