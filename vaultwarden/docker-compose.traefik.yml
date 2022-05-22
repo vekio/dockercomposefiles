@@ -1,0 +1,32 @@
+version: "3.7"
+
+services:
+
+  vaultwarden:
+    networks:
+      - proxy
+    environment:
+      - DOMAIN=https://vault.${DOMAIN:-docker.localhost}
+    labels:
+      - traefik.enable=true
+      # Web UI
+      - traefik.http.routers.vaultwardenWeb-rtr.entrypoints=web
+      - traefik.http.routers.vaultwardenWeb-rtr.rule=Host(`vault.${DOMAIN:-docker.localhost}`)
+      - traefik.http.routers.vaultwardenWeb-rtr.priority=1
+      - traefik.http.routers.vaultwardenWeb-rtr.service=vaultwardenWeb-svc
+      - traefik.http.services.vaultwardenWeb-svc.loadbalancer.server.port=80
+      # WebSocket Notifications Hub
+      - traefik.http.routers.vaultwardenHub-rtr.entrypoints=web
+      - traefik.http.routers.vaultwardenHub-rtr.rule=(Host(`vault.${DOMAIN:-docker.localhost}`) && Path(`/notifications/hub`))
+      - traefik.http.routers.vaultwardenHub-rtr.priority=2
+      - traefik.http.routers.vaultwardenHub-rtr.service=vaultwardenHub-svc
+      - traefik.http.services.vaultwardenHub-svc.loadbalancer.server.port=3012
+      # Admin Page
+      - traefik.http.routers.vaultwardenAdmin-rtr.entrypoints=web
+      - traefik.http.routers.vaultwardenAdmin-rtr.rule=(Host(`vault.${DOMAIN:-docker.localhost}`) && Path(`/admin`))
+      - traefik.http.routers.vaultwardenAdmin-rtr.priority=3
+      - traefik.http.routers.vaultwardenAdmin-rtr.service=vaultwardenWeb-svc
+
+networks:
+  proxy:
+    external: true
