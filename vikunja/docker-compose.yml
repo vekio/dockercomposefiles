@@ -1,0 +1,54 @@
+version: "3.7"
+
+services:
+
+  db:
+    image: postgres:13-alpine
+    container_name: vikunja-db
+    restart: unless-stopped
+    networks:
+      - vikunja
+    environment:
+      - POSTGRES_DB=${VIKUNJA_DB_NAME:-vikunjadb}
+      - POSTGRES_USER=${VIKUNJA_DB_USER:-vikunja}
+      - POSTGRES_PASSWORD=${VIKUNJA_DB_PASS:-password}
+    volumes:
+      - ${VIKUNJA_PATH_DB:-vikunja-db}:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U ${VIKUNJA_DB_USER:-vikunja} -d ${VIKUNJA_DB_NAME:-vikunjadb}
+      interval: 10s
+      timeout: 2s
+      retries: 10
+
+  api:
+    image: vikunja/api:latest
+    container_name: vikunja-api
+    restart: unless-stopped
+    networks:
+      - vikunja
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - VIKUNJA_DATABASE_HOST=db
+      - VIKUNJA_DATABASE_TYPE=postgres
+      - VIKUNJA_DATABASE_USER=${VIKUNJA_DB_USER:-vikunja}
+      - VIKUNJA_DATABASE_PASSWORD=${VIKUNJA_DB_PASS:-password}
+      - VIKUNJA_DATABASE_DATABASE=${VIKUNJA_DB_NAME:-vikunjadb}
+    volumes:
+      - ${VIKUNJA_PATH_DATA:-vikunja-data}:/app/vikunja/files
+
+  frontend:
+    image: vikunja/frontend:latest
+    container_name: vikunja-frontend
+    restart: unless-stopped
+
+volumes:
+  vikunja-db:
+    name: vikunja-db
+  vikunja-data:
+    name: vikunja-data
+
+networks:
+  vikunja:
+    name: vikunja

@@ -1,12 +1,15 @@
 # dockercomposefiles
 
-Para lanzar un servicio `cd servicio && docker compose up -d`
+## Use
 
-Al lanzar `docker compose up` se cargan por defecto los dos archivos:
-    - docker-compose.yml
-    - docker-compose.override.yml
+To run a service cd into the service and execute `docker compose up -d`.
 
-Los archivos .override.yml contienen los puertos en los que se exponen los servicios.
+When launching `docker compose up -d` these two files are loaded by default:
+- docker-compose.yml
+- docker-compose.override.yml
 
-Si se quiere usar el servicio con traefik hay que usar el docker-compose.yml junto con la configuración del archivo docker-compose.traefik.yml correspondiente.
-Ejecutar `docker compose -f docker-compose.yml -f docker-compose.traefik.yml up -d`
+The .override.yml files contain the ports and configuration to expose the services.
+
+If you want to use the service with traefik you have to use the docker-compose.traefik.yml file.
+
+Execute `docker compose -f docker-compose.yml -f docker-compose.traefik.yml up -d`.

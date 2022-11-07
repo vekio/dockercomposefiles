@@ -1,0 +1,30 @@
+version: "3.7"
+
+services:
+
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+    volumes:
+      - ${VAULT_PATH:-vault-data}:/data:rw
+    environment:
+      - SIGNUPS_ALLOWED=false
+      - INVITATIONS_ALLOWED=true # Send invitation using admin page
+      - WEBSOCKET_ENABLED=true
+      - ADMIN_TOKEN=${VAULTWARDEN_ADMIN_TOKEN:-token} # openssl rand -base64 48
+      # - LOG_FILE=/data/vaultwarden.log
+      # - LOG_LEVEL=warn
+      # - SMTP_HOST=${VAULTWARDEN_STMP_HOST}
+      # - SMTP_FROM=${VAULTWARDEN_STMP_FROM}
+      # - SMTP_PORT=${VAULTWARDEN_STMP_PORT}
+      # - SMTP_SSL=true
+      # - SMTP_USERNAME=${VAULTWARDEN_STMP_USER}
+      # - SMTP_PASSWORD=${VAULTWARDEN_STMP_PASS}
+      # - SMTP_AUTH_MECHANISM=${VAULTWARDEN_SMTP_AUTH}
+      # - SMTP_ACCEPT_INVALID_CERTS=${VAULTWARDEN_INVALID_CERTS}
+      # - SMTP_ACCEPT_INVALID_HOSTNAMES=${VAULTWARDEN_INVALID_HOSTNAMES}
+
+volumes:
+  vault-data:
+    name: vault-data
