@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+
+  trilium:
+    networks:
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.trilium-rtr.entrypoints=web
+      - traefik.http.routers.trilium-rtr.rule=Host(`trilium.${DOMAIN:-docker.localhost}`)
+      - traefik.http.routers.trilium-rtr.service=trilium-svc
+      - traefik.http.services.trilium-svc.loadbalancer.server.port=8080
+
+networks:
+  proxy:
+    external: true

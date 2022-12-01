@@ -1,0 +1,20 @@
+version: "3.7"
+
+services:
+
+  trilium:
+    image: zadam/trilium:latest
+    container_name: trilium
+    restart: unless-stopped
+    networks:
+      - trilium
+    volumes:
+      - ${TRILIUM_PATH:-trilium-data}:/home/node/trilium-data:rw
+
+volumes:
+  trilium-data:
+    name: trilium-data
+
+networks:
+  trilium:
+    name: trilium
