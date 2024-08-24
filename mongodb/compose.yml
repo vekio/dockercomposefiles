@@ -1,0 +1,17 @@
+services:
+  ## Mongo - NoSQL database
+  ## Docker Hub: https://hub.docker.com/_/mongo
+  ## Docs:
+  mongo:
+    image: mongo:${MONGO_VERSION:-latest}
+    container_name: mongo
+    restart: unless-stopped
+    networks:
+      - mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-mongo}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS:-insecurePass}
+
+networks:
+  mongo:
+    name: mongo

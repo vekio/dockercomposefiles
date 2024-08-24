@@ -1,0 +1,4 @@
+services:
+  mongo-express:
+    ports:
+      - "8081:8081"
