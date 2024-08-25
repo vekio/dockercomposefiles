@@ -1,0 +1,16 @@
+services:
+
+  traefik:
+    image: traefik:${TRAEFIK_VERSION:-latest}
+    container_name: traefik
+    restart: unless-stopped
+    networks:
+      - proxy
+    environment:
+      TZ: ${TZ:-Europe/London}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+networks:
+  proxy:
+    name: proxy

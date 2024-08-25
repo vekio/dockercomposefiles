@@ -1,0 +1,14 @@
+services:
+
+  traefik:
+    command: --api.insecure=true --providers.docker
+    ports:
+      - 80:80
+      - 8080:8080
+    volumes:
+      - traefik-data:/letsencrypt:rw
+      - traefik-config:/etc/traefik:ro
+
+volumes:
+  traefik-data:
+  traefik-config:
