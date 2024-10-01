@@ -1,6 +1,8 @@
 services:
 
   traefik:
+    command:
+      - --configFile=/etc/traefik/traefik-homelab.yml
     ports:
       - 443:443
       - 666:666
