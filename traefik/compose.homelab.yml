@@ -2,41 +2,15 @@ services:
 
   traefik:
     ports:
-      - "443:443"
-      - "666:666"
-    command:
-      # API
-      - --api.dashboard=true
-      # Logs
-      - --log.level=DEBUG
-      # Global settings
-      - --global.checknewversion=true
-      - --global.sendanonymoususage=false
-      # EntryPoints
-      - --entrypoints.web.address=:80
-      - --entrypoints.web.http.redirections.entrypoint.to=websecure
-      - --entrypoints.web.http.redirections.entrypoint.scheme=https
-      - --entrypoints.web.http.redirections.entrypoint.permanent=true
-      - --entrypoints.websecure.address=:443
-      - --entrypoints.websecure.http.tls.certresolver=digitalocean
-      - --entrypoints.websecure.http.tls.domains[0].main=${DOMAIN}
-      - --entrypoints.websecure.http.tls.domains[0].sans=*.${DOMAIN}
-      # Middlewares
-      - --entrypoints.websecure.http.middlewares=secure-headers@file
-      # Providers
-      - --providers.throttleduration=2s
-      - --providers.file.directory=/etc/traefik/dynamic
-      - --providers.file.watch=true
-      - --providers.docker.watch=true
-      - --providers.docker.exposedbydefault=false
-      - --providers.docker.network=proxy
-      # Certificates
-      - --certificatesresolvers.digitalocean.acme.email=${ACME_EMAIL}
-      - --certificatesresolvers.digitalocean.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
-      - --certificatesresolvers.digitalocean.acme.storage=/letsencrypt/acme.json
-      - --certificatesresolvers.digitalocean.acme.dnschallenge.provider=digitalocean
+      - 443:443
+      - 666:666
     environment:
       DO_AUTH_TOKEN: ${DO_AUTH_TOKEN}
     volumes:
-      - ${SPRING_VOLUME}/traefik/certificates:/letsencrypt:rw
-      - ${SPRING_VOLUME}/traefik/config:/etc/traefik:ro
+      - ${OBERON_PATH}/traefik/certificates:/letsencrypt:rw
+      - ${OBERON_PATH}/traefik/config:/etc/traefik:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.traefik-rtr.entrypoints=web
+      - traefik.http.routers.traefik-rtr.rule=Host(`traefik.${DOMAIN:-docker.localhost}`)
+      - traefik.http.routers.traefik-rtr.service=api@internal
