@@ -1,6 +1,11 @@
 services:
-
+  ## Traefik - Reverse Proxy
+  ## Docker Hub: https://hub.docker.com/_/traefik
+  ## Docs: https://doc.traefik.io/traefik/
   traefik:
+    image: traefik:${TRAEFIK_VERSION:-latest}
+    container_name: traefik
+    restart: unless-stopped
     ports:
       - 80:80
     command:
@@ -10,8 +15,24 @@ services:
       - --providers.docker.exposedbydefault=false
       - --entrypoints.web.address=:80
       - --log.level=DEBUG
+    networks:
+      - proxy
+    environment:
+      TZ: ${TZ:-Europe/London}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-data:/letsencrypt:rw
+      - traefik-config:/etc/traefik:ro
     labels:
       - traefik.enable=true
       - traefik.http.routers.traefik-rtr.entrypoints=web
       - traefik.http.routers.traefik-rtr.rule=Host(`traefik.${DOMAIN:-docker.localhost}`)
       - traefik.http.routers.traefik-rtr.service=api@internal
+
+networks:
+  proxy:
+    name: proxy
+
+volumes:
+  traefik-data:
+  traefik-config:
