@@ -1,7 +1,7 @@
 services:
   ## Portainer - Container management
-  ## Docker Hub:
-  ## Docs:
+  ## Docker Hub: https://hub.docker.com/r/portainer/portainer-ce
+  ## Docs: https://docs.portainer.io/
   portainer:
     image: portainer/portainer-ce:${PORTAINER_VERSION:-latest}
     container_name: portainer
