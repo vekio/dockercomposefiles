@@ -90,46 +90,46 @@ process_files() {
 	if [ "${DCF_LEVEL}" = "compose" ]; then
 		DCF_FILES="-f ${DCF_FOLDER}/compose.yml";
 	elif [ "${DCF_LEVEL}" = "compose.local" ]; then
-		DCF_FILES="-f ${DCF_FOLDER}/compose.yml -f ${DCF_FOLDER}/compose.local.yml";
+		DCF_FILES="-f ${DCF_FOLDER}/compose.local.yml";
 	elif [ "${DCF_LEVEL}" = "compose.traefik" ]; then
-		DCF_FILES="-f ${DCF_FOLDER}/compose.yml -f ${DCF_FOLDER}/compose.traefik.yml";
+		DCF_FILES="-f ${DCF_FOLDER}/compose.traefik.yml";
 	fi
 }
 
 process_command() {
 	case "$COMMAND" in
     run)
-      docker compose $DCF_FILES run
+      docker compose $DCF_FILES --env-file .env run
       ;;
     pull)
-      docker compose $DCF_FILES pull
+      docker compose $DCF_FILES --env-file .env pull
       ;;
     config)
-      docker compose $DCF_FILES config
+      docker compose $DCF_FILES --env-file .env config
       ;;
     up)
-      docker compose $DCF_FILES up -d
+      docker compose $DCF_FILES --env-file .env up -d
       ;;
     down)
-      docker compose $DCF_FILES down -v
+      docker compose $DCF_FILES --env-file .env down -v
       ;;
     build)
-      docker compose $DCF_FILES build
+      docker compose $DCF_FILES --env-file .env build
       ;;
     logs)
-      docker compose $DCF_FILES logs
+      docker compose $DCF_FILES --env-file .env logs
       ;;
     ps)
-      docker compose $DCF_FILES ps
+      docker compose $DCF_FILES --env-file .env ps
       ;;
     restart)
-      docker compose $DCF_FILES restart
+      docker compose $DCF_FILES --env-file .env restart
       ;;
     stop)
-      docker compose $DCF_FILES stop
+      docker compose $DCF_FILES --env-file .env stop
       ;;
     rm)
-      docker compose $DCF_FILES rm
+      docker compose $DCF_FILES --env-file .env rm
       ;;
   esac
 }
