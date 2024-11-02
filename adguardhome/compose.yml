@@ -1,0 +1,31 @@
+services:
+  ## AdGuard Home - Network-wide ads & trackers blocking DNS server
+  ## Docker Hub: https://hub.docker.com/r/adguard/adguardhome
+  ## Docs: https://adguard-dns.io/kb/adguard-home/overview/
+  adguardhome:
+    image: adguard/adguardhome:${ADGUARD_VERSION:-latest}
+    container_name: adguardhome
+    restart: unless-stopped
+    ports:
+      - 53:53/tcp         # Plain DNS port
+      - 53:53/udp         # Plain DNS port
+      # - 67:67/udp       # DHCP port (optional)
+      # - 68:68/tcp       # DHCP port (optional)
+      # - 68:68/udp       # DHCP port (optional)
+      - 80:80/tcp         # Web UI
+      - 443:443/tcp
+      - 443:443/udp
+      - 3000:3000/tcp     # Admin panel port
+      # - 853:853/tcp
+      # - 784:784/udp
+      # - 853:853/udp
+      # - 8853:8853/udp
+      # - 5443:5443/tcp
+      # - 5443:5443/udp
+    volumes:
+      - adguardhome-data:/opt/adguardhome/work
+      - adguardhome-config:/opt/adguardhome/conf
+
+volumes:
+  adguardhome-data:
+  adguardhome-config:

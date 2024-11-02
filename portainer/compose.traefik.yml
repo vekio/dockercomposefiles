@@ -1,0 +1,29 @@
+services:
+  ## Portainer - Container Management
+  ## Docker Hub: https://hub.docker.com/r/portainer/portainer-ce
+  ## Docs: https://docs.portainer.io/
+  portainer:
+    image: portainer/portainer-ce:${PORTAINER_VERSION:-latest}
+    container_name: portainer
+    restart: unless-stopped
+    # ports:
+    #   - 9000:9000
+    #   - 9443:9443 # Self-signed SSL certificate secure port
+    networks:
+      - proxy
+    volumes:
+      - portainer-data:/data:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.portainer-rtr.entrypoints=web
+      - traefik.http.routers.portainer-rtr.rule=Host(`portainer.${DOMAIN:-docker.localhost}`)
+      - traefik.http.routers.portainer-rtr.service=portainer-svc
+      - traefik.http.services.portainer-svc.loadbalancer.server.port=9000
+
+networks:
+  proxy:
+    external: true
+
+volumes:
+  portainer-data:
