@@ -6,8 +6,8 @@ services:
     image: portainer/portainer-ce:${PORTAINER_VERSION:-latest}
     container_name: portainer
     restart: unless-stopped
-    ports:
-      - 9000:9000
+    # ports:
+    #   - 9000:9000
     #   - 9443:9443 # Self-signed SSL certificate secure port
     networks:
       - proxy
