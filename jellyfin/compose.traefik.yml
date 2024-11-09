@@ -1,0 +1,29 @@
+services:
+  ## Jellyfin - Media Server
+  ## Docker Hub: https://hub.docker.com/r/jellyfin/jellyfin
+  ## Docs: https://jellyfin.org/docs/
+  jellyfin:
+    image: jellyfin/jellyfin:${JELLYFIN_VERSION:-latest}
+    container_name: jellyfin
+    restart: unless-stopped
+    networks:
+      - proxy
+    volumes:
+      - jellyfin-config:/config:rw
+      - jellyfin-cache:/cache:rw
+      - jellyfin-media:/media:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jellyfin-rtr.entrypoints=web
+      - traefik.http.routers.jellyfin-rtr.rule=Host(`media.${DOMAIN:-docker.localhost}`)
+      - traefik.http.routers.jellyfin-rtr.service=jellyfin-svc
+      - traefik.http.services.jellyfin-svc.loadbalancer.server.port=8096
+
+networks:
+  proxy:
+    external: true
+
+volumes:
+  jellyfin-config:
+  jellyfin-cache:
+  jellyfin-media:

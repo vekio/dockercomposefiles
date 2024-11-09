@@ -1,0 +1,19 @@
+services:
+  ## Jellyfin - Media Server
+  ## Docker Hub: https://hub.docker.com/r/jellyfin/jellyfin
+  ## Docs: https://jellyfin.org/docs/
+  jellyfin:
+    image: jellyfin/jellyfin:${JELLYFIN_VERSION:-latest}
+    container_name: jellyfin
+    restart: unless-stopped
+    ports:
+      - 8096:8096
+    volumes:
+      - jellyfin-config:/config:rw
+      - jellyfin-cache:/cache:rw
+      - jellyfin-media:/media:ro
+
+volumes:
+  jellyfin-config:
+  jellyfin-cache:
+  jellyfin-media:
