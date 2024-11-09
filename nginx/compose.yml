@@ -1,0 +1,19 @@
+services:
+  ## Nginx - Web Server
+  ## Docker Hub: https://hub.docker.com/_/nginx
+  ## Docs: https://nginx.org/en/docs/
+  nginx:
+    image: nginx:${NGINX_VERSION:-latest}
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 8090:80
+    volumes:
+      - nginx-html:/usr/share/nginx/html:rw
+      - nginx-conf:/etc/nginx/conf.d:rw
+      - nginx-logs:/var/log/nginx:rw
+
+volumes:
+  nginx-html:
+  nginx-conf:
+  nginx-logs:

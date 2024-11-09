@@ -1,0 +1,29 @@
+services:
+  ## Nginx - Web Server
+  ## Docker Hub: https://hub.docker.com/_/nginx
+  ## Docs: https://nginx.org/en/docs/
+  nginx:
+    image: nginx:${NGINX_VERSION:-latest}
+    container_name: nginx
+    restart: unless-stopped
+    networks:
+      - proxy
+    volumes:
+      - nginx-html:/usr/share/nginx/html:rw
+      - nginx-conf:/etc/nginx/conf.d:rw
+      - nginx-logs:/var/log/nginx:rw
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.nginx-rtr.entrypoints=web
+      - traefik.http.routers.nginx-rtr.rule=Host(`nginx.${DOMAIN:-docker.localhost}`)
+      - traefik.http.routers.nginx-rtr.service=nginx-svc
+      - traefik.http.services.nginx-svc.loadbalancer.server.port=80
+
+networks:
+  proxy:
+    external: true
+
+volumes:
+  nginx-html:
+  nginx-conf:
+  nginx-logs:
