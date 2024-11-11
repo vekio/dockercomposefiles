@@ -1,0 +1,65 @@
+services:
+  ## Logto - Auth
+  ## Docs: https://docs.logto.io/
+  logto:
+    image: ghcr.io/logto-io/logto:${LOGTO_VERSION:-latest}
+    container_name: logto
+    restart: unless-stopped
+    # ports:
+    #   - 3001:3001
+    #   - 3002:3002
+    networks:
+      - logto
+      - proxy
+    depends_on:
+      logto-db:
+        condition: service_healthy
+    entrypoint: [ "sh", "-c", "npm run cli db seed -- --swe && npm start" ]
+    environment:
+      TRUST_PROXY_HEADER: 0
+      DB_URL: postgres://${LOGTO_DB_USER:-logto}:${LOGTO_DB_PASS:-insecurePass}@logto-db:5432/${LOGTO_DB_NAME:-logtodb}
+      ENDPOINT: "http://logto.${DOMAIN:-docker.localhost}"
+      ADMIN_ENDPOINT: "http://logto-admin.${DOMAIN:-docker.localhost}"
+      # LOGTO_SMTP_HOST: "smtp.example.com" # Optional: SMTP configuration for email notifications
+      # LOGTO_SMTP_PORT: "587"
+      # LOGTO_SMTP_USER: "user@example.com"
+      # LOGTO_SMTP_PASSWORD: "password"
+      # LOGTO_SMTP_FROM: "no-reply@example.com"
+      # LOGTO_SMTP_SECURE: "true"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.logto-rtr.entrypoints=web
+      - traefik.http.routers.logto-rtr.rule=Host(`logto.${DOMAIN:-docker.localhost}`)
+      - traefik.http.routers.logto-rtr.service=logto-svc
+      - traefik.http.services.logto-svc.loadbalancer.server.port=3001
+      - traefik.http.routers.logto-admin-rtr.entrypoints=web
+      - traefik.http.routers.logto-admin-rtr.rule=Host(`logto-admin.${DOMAIN:-docker.localhost}`)
+      - traefik.http.routers.logto-admin-rtr.service=logto-admin-svc
+      - traefik.http.services.logto-admin-svc.loadbalancer.server.port=3002
+
+  logto-db:
+    image: postgres:${LOGTO_DB_VERSION:-14-alpine}
+    container_name: logto-db
+    restart: unless-stopped
+    networks:
+      - logto
+    environment:
+      POSTGRES_DB: ${LOGTO_DB_NAME:-logtodb}
+      POSTGRES_USER: ${LOGTO_DB_USER:-logto}
+      POSTGRES_PASSWORD: ${LOGTO_DB_PASS:-insecurePass}
+    volumes:
+      - logto-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 2s
+      retries: 10
+
+volumes:
+  logto-data:
+
+networks:
+  proxy:
+    external: true
+  logto:
+    name: logto
