@@ -1,0 +1,21 @@
+services:
+  qbittorrent:
+    image: linuxserver/qbittorrent:${QBITTORRENT_VERSION:-latest}
+    container_name: qbittorrent
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Madrid
+      - WEBUI_PORT=8080
+    ports:
+      - 8080:8080
+      - 6881:6881
+      - 6881:6881/udp
+    volumes:
+      - qbittorrent-config:/config:rw
+      - qbittorrent-download:/downloads:rw
+      - qbittorrent-watch:/watch:rw
+
+volumes:
+  qbittorrent-config:
+  qbittorrent-download:
+  qbittorrent-watch:
